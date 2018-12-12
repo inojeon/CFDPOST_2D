@@ -4,8 +4,13 @@
 # To do list
 
  - read rlt file (done)
-
-
+ - render 2d contour (done)
+ - zoom (done)
+  - fixed axis bug (done)
+ - render mulit rlt files
+ - add color bar
+ - add menu
+   - change color scale 
 
 
 
