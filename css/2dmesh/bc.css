@@ -1,0 +1,145 @@
+
+.line  {
+  fill: none;
+  stroke: black;
+  stroke-width: 0.3;
+  vector-effect: non-scaling-stroke;
+}
+
+.axis line {
+  stroke-opacity: 0.1;
+  shape-rendering: crispEdges;
+}
+.edgh {
+  fill: white;
+  fill-opacity: 0;
+  stroke: black;
+  stroke-opacity: 0;
+  stroke-width: 0;
+  vector-effect: non-scaling-stroke;
+}
+
+.bc  {
+}
+.bcline  {
+  fill: none;
+  stroke: black;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.displayOn {
+  display: inline;
+}
+.displayOff {
+  display: none !important;
+}
+.bcTransParent{
+  fill: none;
+  stroke: white;
+  stroke-width: 30;
+  vector-effect: non-scaling-stroke;
+  opacity: 0;
+  cursor: pointer;
+}
+.bcTransParentSelect{
+  fill: none;
+  stroke-width: 5;
+  vector-effect: non-scaling-stroke;
+  stroke-opacity: 1;
+}
+
+.bc1  {
+  stroke: rgb(214, 39, 40);
+}
+.bc2 {
+  stroke: #f26522;
+}
+.bc3  {
+  stroke: rgb(31, 119, 180);
+}
+.bc4 {
+  stroke: hsl(0, 0%, 21%);
+}
+.bc5 {
+  stroke: hsl(171, 100%, 41%);
+}
+.bc6  {
+  stroke: rgb(44, 160, 44);
+}
+.bc7  {
+  stroke: rgb(227, 119, 194);
+}
+.bc8 {
+  stroke: hsl(217, 71%, 53%);
+}
+.bc9  {
+  stroke: #f8b500;
+}
+.bc10 {
+  stroke: hsl(204, 86%, 53%);
+}
+.bc11  {
+  stroke: #26baee;
+}
+.bc12  {
+  stroke: #ffde7d;
+}
+.bc13  {
+  stroke: #f6416c;
+}
+.bc14  {
+  stroke: rgb(148, 103, 189);
+}
+.bc15 {
+  stroke: hsl(141, 71%, 48%);
+}
+.bc16 {
+  stroke: hsl(48, 100%, 67%);
+}
+.bc17 {
+  stroke: hsl(348, 100%, 61%);
+}
+.bc18 {
+  stroke: #EFC03D;
+}
+.bc19 {
+  stroke: #177E89;
+}
+.bc20 {
+  stroke: #084C61;
+}
+.bc21 {
+  stroke: #DB3A34;
+}
+.bc22 {
+  stroke: #323031;
+}
+.bc23 {
+  stroke: #6699CC;
+}
+.bc24 {
+  stroke: #FF8C42;
+}
+.bc31  {
+  stroke: hsl(141, 71%, 48%);
+}
+.bc32  {
+  stroke: #00b8a9;
+}
+.bc33  {
+  stroke: rgb(140, 86, 75);
+}
+.bc34  {
+  stroke: #6fe7dd;
+}
+.bc35  {
+  stroke: #3490de;
+}
+.bc36  {
+  stroke: #6639a6;
+}
+
+.bc99  {
+  stroke-opacity: 0.3;
+  stroke-dasharray: 5, 5;
+}

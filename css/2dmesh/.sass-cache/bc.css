@@ -1,0 +1,138 @@
+.line {
+  fill: none;
+  stroke: black;
+  stroke-width: 0.3;
+  vector-effect: non-scaling-stroke; }
+
+.axis line {
+  stroke-opacity: 0.1;
+  shape-rendering: crispEdges; }
+
+.edgh {
+  fill: white;
+  fill-opacity: 0;
+  stroke: black;
+  stroke-opacity: 0;
+  stroke-width: 0;
+  vector-effect: non-scaling-stroke; }
+
+.bcline {
+  fill: none;
+  stroke: black;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke; }
+
+.displayOn {
+  display: inline; }
+
+.displayOff {
+  display: none !important; }
+
+.bcTransParent {
+  fill: none;
+  stroke: white;
+  stroke-width: 30;
+  vector-effect: non-scaling-stroke;
+  opacity: 0;
+  cursor: pointer; }
+
+.bcTransParentSelect {
+  fill: none;
+  stroke-width: 5;
+  vector-effect: non-scaling-stroke;
+  stroke-opacity: 1; }
+
+.bc1 {
+  stroke: #d62728; }
+
+.bc2 {
+  stroke: #f26522; }
+
+.bc3 {
+  stroke: #1f77b4; }
+
+.bc4 {
+  stroke: #363636; }
+
+.bc5 {
+  stroke: #00d1b2; }
+
+.bc6 {
+  stroke: #2ca02c; }
+
+.bc7 {
+  stroke: #e377c2; }
+
+.bc8 {
+  stroke: #3273dc; }
+
+.bc9 {
+  stroke: #f8b500; }
+
+.bc10 {
+  stroke: #209cee; }
+
+.bc11 {
+  stroke: #26baee; }
+
+.bc12 {
+  stroke: #ffde7d; }
+
+.bc13 {
+  stroke: #f6416c; }
+
+.bc14 {
+  stroke: #9467bd; }
+
+.bc15 {
+  stroke: #23d160; }
+
+.bc16 {
+  stroke: #ffdd57; }
+
+.bc17 {
+  stroke: #ff3860; }
+
+.bc18 {
+  stroke: #EFC03D; }
+
+.bc19 {
+  stroke: #177E89; }
+
+.bc20 {
+  stroke: #084C61; }
+
+.bc21 {
+  stroke: #DB3A34; }
+
+.bc22 {
+  stroke: #323031; }
+
+.bc23 {
+  stroke: #6699CC; }
+
+.bc24 {
+  stroke: #FF8C42; }
+
+.bc31 {
+  stroke: #23d160; }
+
+.bc32 {
+  stroke: #00b8a9; }
+
+.bc33 {
+  stroke: #8c564b; }
+
+.bc34 {
+  stroke: #6fe7dd; }
+
+.bc35 {
+  stroke: #3490de; }
+
+.bc36 {
+  stroke: #6639a6; }
+
+.bc99 {
+  stroke-opacity: 0.3;
+  stroke-dasharray: 5, 5; }
+

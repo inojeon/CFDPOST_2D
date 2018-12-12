@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>2D CFD POST</title>
+</head>
+<body>
+  
+  <svg width="500" height="500" stroke="#fff" stroke-width="1."></svg>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="https://d3js.org/d3-contour.v1.min.js"></script>
+  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+  <script>  
+  var result = {};
+
+  d3.text("./result1/result_002.rlt", function(error, data) {
+    if (error) throw error;
+    
+    result = readCFDData(data); 
+
+
+    // Structured (n * m) grid of data. Point coordinates are (xgrid, ygrid) 
+    var n = result.x_langth , m = result.y_langth;
+    var values = (result.p);
+    var xgrid = (result.x);
+    var ygrid = (result.y);
+    
+    /*
+    // Populate plot data
+    for (var j = 0., k = 0; j < m; ++j) {
+        for (var i = 0.; i < n; ++i, ++k) {
+            xgrid[k] = i;
+            ygrid[k] = 25*Math.sin(i*Math.PI/50) + j;
+            values[k] = Math.pow(xgrid[k]-50,2) + Math.pow(ygrid[k]-50,2);
+        }
+    }
+    */
+    var svg = d3.select("svg"),
+        width = +svg.attr("width"),
+        height = +svg.attr("height");
+      
+    // set x and y scale to maintain 1:1 aspect ratio  
+    var domainAspectRatio = (d3.max(ygrid)-d3.min(ygrid))/(d3.max(xgrid)-d3.min(xgrid));
+    var rangeAspectRatio = height / width;
+
+
+    
+      
+    if (rangeAspectRatio > domainAspectRatio) {
+        var xscale = d3.scaleLinear()
+            .domain(d3.extent(xgrid))
+            .range([0,width]);
+        var yscale = d3.scaleLinear()
+            .domain(d3.extent(ygrid))
+            .range([domainAspectRatio*width,0]);
+    } else {
+        var xscale = d3.scaleLinear()
+            .domain(d3.extent(xgrid))
+            .range([0,height/domainAspectRatio]);
+        var yscale = d3.scaleLinear()
+            .domain(d3.extent(ygrid))
+            .range([height,0]);
+    }
+      
+    // configure a projection to map the contour coordinates returned by
+    // d3.contours (px,py) to the input data (xgrid,ygrid)
+    var projection = d3.geoTransform({
+        point: function(px, py) {
+            var xfrac, yfrac, xnow, ynow;
+            var xidx, yidx, idx0, idx1, idx2, idx3;
+            // remove the 0.5 offset that comes from d3-contour
+            px=px-0.5;
+            py=py-0.5;
+            // clamp to the limits of the xgrid and ygrid arrays (removes "bevelling" from outer perimeter of contours)
+            if ( px < 0) { px = 0;} // px < 0 ? px = 0 : px;
+            if ( py < 0) { py = 0;} // py < 0 ? py = 0 : py;
+            if ( px > (n-1) ) { px = n-1; } // px > (n-1) ? px = n-1 : px;
+            if ( py > (m-1) ) { py = m-1; } // py > (m-1) ? py = m-1 : py;
+            // xidx and yidx are the array indices of the "bottom left" corner
+            // of the cell in which the point (px,py) resides
+            xidx = Math.floor(px);
+            yidx = Math.floor(py); 
+            if ( xidx == (n-1) ) { xidx = n-2; } // xidx == (n-1) ? xidx = n-2 : xidx;
+            if ( yidx == (m-1) ) { yidx = m-2; } // yidx == (m-1) ? yidx = m-2 : yidx;
+            // xfrac and yfrac give the coordinates, between 0 and 1,
+            // of the point within the cell 
+            xfrac = px-xidx;
+            yfrac = py-yidx;
+            // indices of the 4 corners of the cell
+            idx0 = xidx + yidx*n;
+            idx1 = idx0 + 1;
+            idx2 = idx0 + n;
+            idx3 = idx2 + 1;
+            // bilinear interpolation to find projected coordinates (xnow,ynow)
+            // of the current contour coordinate
+            xnow = (1-xfrac)*(1-yfrac)*xgrid[idx0] + xfrac*(1-yfrac)*xgrid[idx1] + yfrac*(1-xfrac)*xgrid[idx2] + xfrac*yfrac*xgrid[idx3];
+            ynow = (1-xfrac)*(1-yfrac)*ygrid[idx0] + xfrac*(1-yfrac)*ygrid[idx1] + yfrac*(1-xfrac)*ygrid[idx2] + xfrac*yfrac*ygrid[idx3];
+            this.stream.point(xscale(xnow), yscale(ynow));
+        }
+    });
+      
+    // array of threshold values 
+    var thresholds = d3.range(d3.min(values),d3.max(values),(d3.max(values)- d3.min(values))/22);
+    console.log(thresholds);
+    
+    // color scale  
+    var color = d3.scaleLinear()
+        .domain(d3.extent(thresholds))
+        .interpolate(function() { return d3.interpolateRdBu; });  
+      
+    // initialise contours
+    var contours = d3.contours()
+        .size([n, m])
+        .smooth(true)
+        .thresholds(thresholds);
+    
+    console.log(contours);
+    
+    // make and project the contours
+    svg.selectAll("path")
+        .data(contours(values))
+        .enter().append("path")
+            .attr("d", d3.geoPath(projection))
+            .attr("fill", function(d) { return color(d.value); });
+  });
+ 
+
+
+  function readCFDData(data){
+    var datas = data.trim().split(/[\s,="']+/);
+    var mode = 0;
+
+    var colum_val =[];
+    var zone = {};
+    var zone_val = [];
+    var zone_keys = [];
+    var trace = {};
+    var x_langth, y_langth;
+    var r = 0;
+    var plotType = '2D';
+
+    if (!datas[0].toLowerCase().match(/^variables/)) {
+      var lines = data.split('\n');
+    } else { // plot3D type
+      for(var i = 0; i < datas.length; i++) {
+        if (datas[i].toLowerCase().match(/^variables/)) {
+          var j = 0;
+          while(!datas[i+1].toLowerCase().match(/^zone/)){
+            i = i + 1;
+            //console.log(datas[i])
+            var replaced = datas[i].replace(/\W*/g,'').toLowerCase();
+            //console.log(replaced)
+            if ( replaced ) {
+              colum_val[j++] = replaced;
+            }
+          }
+        } else if (datas[i].toLowerCase().match('zone')){
+          i=i+1;
+          var j = 0;
+          var key = "";
+          var value = "";
+          var i_flag = false, j_flag = false;
+
+          //console.log(datas[i]);
+          while ( datas[i].replace(/\W+/g,'').match(/^[a-zA-Z]/) ) {
+            var key = datas[i].replace(/\W+/g,'').toLowerCase();
+            var value = "";
+            while ( ! value ) {
+              value = datas[++i].replace(/\W+/g,'').toLowerCase();
+            }
+            if( key.match(/[i]/)){
+              zone[key] = parseInt(value);
+              i_flag = true;
+            } else if( key.match(/[j]/)){
+              zone[key] = parseInt(value);
+              j_flag = true;
+
+            } else if ( key.match(/[tf]/)) {
+              zone[key] = value;
+            }
+
+            i++;
+          }
+          i--;
+
+          if (i_flag && j_flag ) {
+            plotType = '3D';
+          } else {
+            plotType = '2D';
+
+
+            for (var p = 0; p < colum_val.length; p++) {
+              trace[colum_val[p]] = new Array();
+            }
+          }
+        } else {     //read data
+          if (plotType == '2D'){
+            for (var p = 0; p < colum_val.length; p++) {
+              trace[colum_val[p]][r] = parseFloat(datas[i++]);
+            }
+            i--;
+            r++;
+          } else if (plotType == '3D') {
+            trace['a'] = new Array();
+            trace['b'] = new Array();
+
+            var rr=0;
+
+            for (var k = 0; k < zone.j; k++) {
+              //console.log(k);
+              for (var q = 0; q < zone.i; q++) {
+                for (var p = 0; p < colum_val.length; p++) {
+                  if ((k==0) && (q==0) ){            // 객체 원소 생성
+                    trace[colum_val[p]] = new Array();
+                  }
+                  if(p==0){
+                    trace.a[rr] = q;
+                  } else if(p==1) {
+                    trace.b[rr] = k;
+                  }
+                  trace[colum_val[p]][rr] = parseFloat(datas[i++]);
+                }
+                rr++;
+              }
+            }
+            trace.x_langth = zone.i;
+            trace.y_langth = zone.j;
+
+          } else {
+            return -1;
+          }
+        }
+      }
+      trace.zone = zone;
+      trace.varlist = colum_val;
+      trace.plotType = plotType;
+
+//        console.log(trace);
+
+      if (trace.plotType.match('2D')) {
+
+        return trace;
+
+      } else if (trace.plotType.match('3D')) {
+
+        return trace;
+      } else {
+        return -1;
+      }
+    }
+  }
+  
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+
+body{
+  margin :0;
+}
+.lineTooltip {
+  position: absolute;
+  text-align: left;
+  width: auto;
+  height: auto;
+  padding: 8px;
+  margin-top: 10px;
+  margin-left: 10px;
+  font: 15px sans-serif;
+  background: #fff;
+  pointer-events: none;
+}
+.dropdown-menu {
+  min-width: 6rem;
+}
+
+.ht_clone_top {
+ z-index:4 !important
+}
+.ht_clone_left {
+ z-index:5 !important
+}
+.ht_clone_bottom_left_corner,.ht_clone_debug,.ht_clone_top_left_corner {
+ z-index:6 !important
+}
