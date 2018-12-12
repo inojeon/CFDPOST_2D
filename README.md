@@ -1,4 +1,12 @@
-# d3.js 기반 cfd 2d post viewr
+# d3.js 기반 cfd 2d post viewer
+
+
+# To do list
+
+ - read rlt file (done)
+
+
+
 
 
 # reference

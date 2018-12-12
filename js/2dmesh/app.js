@@ -1,3 +1,121 @@
+
+function readCFDData(data){
+  var datas = data.trim().split(/[\s,="']+/);
+
+  var colum_val =[];
+  var zone = {};
+  var trace = {};
+  var r = 0;
+  var plotType = '2D';
+
+  if (!datas[0].toLowerCase().match(/^variables/)) {
+    
+  } else { // plot3D type
+    for(var i = 0; i < datas.length; i++) {
+      if (datas[i].toLowerCase().match(/^variables/)) {
+        var j = 0;
+        while(!datas[i+1].toLowerCase().match(/^zone/)){
+          i = i + 1;
+          //console.log(datas[i])
+          var replaced = datas[i].replace(/\W*/g,'').toLowerCase();
+          //console.log(replaced)
+          if ( replaced ) {
+            colum_val[j++] = replaced;
+          }
+        }
+      } else if (datas[i].toLowerCase().match('zone')){
+        i=i+1;
+        var j = 0;
+        var key = "";
+        var value = "";
+        var i_flag = false, j_flag = false;
+
+        //console.log(datas[i]);
+        while ( datas[i].replace(/\W+/g,'').match(/^[a-zA-Z]/) ) {
+          var key = datas[i].replace(/\W+/g,'').toLowerCase();
+          var value = "";
+          while ( ! value ) {
+            value = datas[++i].replace(/\W+/g,'').toLowerCase();
+          }
+          if( key.match(/[i]/)){
+            zone[key] = parseInt(value);
+            i_flag = true;
+          } else if( key.match(/[j]/)){
+            zone[key] = parseInt(value);
+            j_flag = true;
+
+          } else if ( key.match(/[tf]/)) {
+            zone[key] = value;
+          }
+
+          i++;
+        }
+        i--;
+
+        if (i_flag && j_flag ) {
+          plotType = '3D';
+        } else {
+          plotType = '2D';
+
+
+          for (var p = 0; p < colum_val.length; p++) {
+            trace[colum_val[p]] = new Array();
+          }
+        }
+      } else {     //read data
+        if (plotType == '2D'){
+          for (var p = 0; p < colum_val.length; p++) {
+            trace[colum_val[p]][r] = parseFloat(datas[i++]);
+          }
+          i--;
+          r++;
+        } else if (plotType == '3D') {
+          var rr=0;
+
+          for (var k = 0; k < zone.j; k++) {
+            //console.log(k);
+            for (var q = 0; q < zone.i; q++) {
+              for (var p = 0; p < colum_val.length; p++) {
+                if ((k==0) && (q==0) ){            // 객체 원소 생성
+                  trace[colum_val[p]] = new Array();
+                }
+                trace[colum_val[p]][rr] = parseFloat(datas[i++]);
+              }
+              rr++;
+            }
+          }
+          trace.x_langth = zone.i;
+          trace.y_langth = zone.j;
+
+        } else {
+          return -1;
+        }
+      }
+    }
+    trace.zone = zone;
+    trace.varlist = colum_val;
+    trace.plotType = plotType;
+
+
+    var absMaxX = Math.max.apply(null, trace[colum_val[0]].map(Math.abs));
+    var absMaxY = Math.max.apply(null, trace[colum_val[1]].map(Math.abs));
+    trace.maxSize = Math.max(absMaxX, absMaxY);
+
+//        console.log(trace);
+
+    if (trace.plotType.match('2D')) {
+
+      return trace;
+
+    } else if (trace.plotType.match('3D')) {
+
+      return trace;
+    } else {
+      return -1;
+    }
+  }
+}
+
 function transpose(array) {
   return array.reduce((prev, next) => next.map((item, i) =>
     (prev[i] || []).concat(next[i])), []);
