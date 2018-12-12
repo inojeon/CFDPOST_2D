@@ -73,13 +73,6 @@ d3.text("./result1/result_002.rlt", function(error, data) {
     .tickPadding(8 - width);
 
 
-  var gX = g.append("g")
-    .attr("class", "axis")
-    .call(xAxis);
-  var gY = g.append("g")
-    .attr("class", "axis")
-    .call(yAxis);
-
   var line = d3.line()
     .x(function(d) {
       return x(d.x);
@@ -88,7 +81,8 @@ d3.text("./result1/result_002.rlt", function(error, data) {
       return y(d.y);
     })
   
-  var contourPath = g.append("g");
+  var contourPath = g.append("g")
+                      .attr("clip-path", "url(#clip)");
 
 
   // ino lineeeeeeeee
@@ -167,6 +161,13 @@ d3.text("./result1/result_002.rlt", function(error, data) {
 
   var contourAll = svg.selectAll(".contour");
 
+
+  var gX = g.append("g")
+    .attr("class", "axis")
+    .call(xAxis);
+  var gY = g.append("g")
+    .attr("class", "axis")
+    .call(yAxis);
 
   var zoom = d3.zoom()
   .scaleExtent([1, 1000])
