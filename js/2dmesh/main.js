@@ -9,12 +9,14 @@ d3.text("./result1/naca0012_3blks.msh", function (err, data) {
 */
 
 
-d3.text("./result1/result_002.rlt", function(error, data) {
-  if (error) throw error;
+//d3.text("./result1/result_002.rlt"), function(error, data) {      // d3.v4 version
+d3.text("./result1/result_002.rlt").then(function(data) {         // d3.v5 version
+
+ // if (error) throw error;
   
   var rltData = readCFDData(data); 
 
-  console.log(rltData);
+//  console.log(rltData);
 
 
   var winWidth = parseInt(d3.select('.wb-appFrame-ViewerColumn').style('width'));
@@ -137,7 +139,7 @@ d3.text("./result1/result_002.rlt", function(error, data) {
     
   // array of threshold values 
   var thresholds = d3.range(d3.min(values),d3.max(values),(d3.max(values)- d3.min(values))/22);
-  console.log(thresholds);
+//  console.log(thresholds);
   
   // color scale  
   var color = d3.scaleLinear()
