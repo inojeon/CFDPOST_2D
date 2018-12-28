@@ -8,7 +8,7 @@
  - zoom (done)
    - fixed axis bug (done)
  - render multi rlt files (done)
-   - Set the same thresholds 
+   - Set the same thresholds (done)
  - Set initView 
  - add color bar
  - add menu

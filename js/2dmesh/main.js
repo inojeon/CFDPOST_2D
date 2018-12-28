@@ -2,7 +2,14 @@ class Chart {
   constructor(canvas, rltDatas){
     this.canvas = canvas;
     this.rltDatas = rltDatas;
+    this.getThresholds();
     this.draw();
+  }
+  getThresholds (){
+    const min = this.rltDatas.map(d => d3.min(d.p) );
+    const max = this.rltDatas.map(d => d3.max(d.p) );
+
+    this.thresholds = d3.range( d3.min(min), d3.max(max), (d3.max(max) - d3.min(min))/22) ;
   }
   draw(){
     this.winWidth = parseInt(d3.select(this.canvas).style('width'));
@@ -34,7 +41,7 @@ class Chart {
       .attr("width", width)
       .attr("height", height);
     
-    this.maxSize = Math.max(...this.rltDatas.map( d => d.maxSize));
+    this.maxSize = d3.max(this.rltDatas.map( d => d.maxSize));
 
     const canvasSize = this.maxSize * 4;
     const ratioWH = width / height;
@@ -108,8 +115,9 @@ class Chart {
         
       // array of threshold values 
      // var thresholds = [0.5605645972834632, 0.5765077054217598, 0.5924508135600565, 0.608393921698353, 0.6243370298366496, 0.6402801379749462, 0.6562232461132429, 0.6721663542515395, 0.6881094623898361, 0.7040525705281326, 0.7199956786664293, 0.7359387868047259, 0.7518818949430226, 0.7678250030813192, 0.7837681112196158, 0.7997112193579123, 0.8156543274962089, 0.8315974356345056, 0.8475405437728022, 0.8634836519110989, 0.8794267600493955, 0.895369868187692];
-      var thresholds = d3.range(d3.min(values),d3.max(values),(d3.max(values) - d3.min(values))/22);
-        console.log(thresholds);
+      var thresholds = this.thresholds;
+     //     var thresholds = d3.range(d3.min(values),d3.max(values),(d3.max(values) - d3.min(values))/22);
+ //       console.log(thresholds);
 
       // color scale  
       var color = d3.scaleLinear()
