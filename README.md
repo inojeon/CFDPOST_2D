@@ -6,8 +6,10 @@
  - read rlt file (done)
  - render 2d contour (done)
  - zoom (done)
-  - fixed axis bug (done)
- - render mulit rlt files
+   - fixed axis bug (done)
+ - render multi rlt files (done)
+   - Set the same thresholds 
+ - Set initView 
  - add color bar
  - add menu
    - change color scale 
