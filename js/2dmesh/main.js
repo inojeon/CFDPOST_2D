@@ -2,79 +2,174 @@ class Chart {
   constructor(canvas, rltDatas){
     this.canvas = canvas;
     this.rltDatas = rltDatas;
-    this.getThresholds();
-    this.draw();
+    const firstValue = this.createSelectOption();
+    this.draw(firstValue);
   }
-  getThresholds (){
-    const min = this.rltDatas.map(d => d3.min(d.p) );
-    const max = this.rltDatas.map(d => d3.max(d.p) );
+  createSelectOption(){
+    var  data = this.rltDatas[0].varlist;
+    data = data.filter(el => el !== "x")
+    data = data.filter(el => el !== "y")
 
-    this.thresholds = d3.range( d3.min(min), d3.max(max), (d3.max(max) - d3.min(min))/22) ;
+    var select = d3.select('#contourSelect').on('change', onchange);
+    select.selectAll('option')
+          .data(data).enter()
+          .append('option')
+          .text(function (d) { return d; });
+    return data[0];
   }
-  draw(){
+
+  draw (plotValue){
+    this.createSvg();
+    this.createScales();
+    this.getThresholds(plotValue);
+    this.addContours(plotValue);
+    this.addZoom();
+    this.initView();
+  }
+  redraw (plotValue){
+    const svg = d3.select("#mainCanvas");
+    this.getThresholds(plotValue);
+    this.addContours(plotValue);
+
+    var gX = this.gX;
+    var gY = this.gY;
+
+    this.zoom.on("zoom", zoomed);
+
+    svg.call(this.zoom);
+
+    var contourAll = svg.selectAll(".contour"); 
+    
+    var x = this.x;
+    var y = this.y;
+    var xAxis = this.xAxis;
+    var yAxis = this.yAxis;
+
+    contourAll.attr("transform", zoomData);
+    gX.call(xAxis.scale(zoomData.rescaleX(x)));
+    gY.call(yAxis.scale(zoomData.rescaleY(y)));
+
+    function zoomed() {
+      contourAll.attr("transform", d3.event.transform);
+      gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
+      gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
+      zoomData = d3.event.transform;
+    }
+  }
+  createScales() {        
+ //   const width = this.winWidth - this.margin.left - this.margin.right,
+ //        height = this.winHeight - this.margin.top - this.margin.bottom;
+    const width = this.width;
+    const height = this.height;
+
+    const maxSize = d3.max(this.rltDatas.map( d => d.maxSize));
+
+    this.canvasSize = maxSize * 4;
+    this.ratioWH = width / height;
+
+    this.x = d3.scaleLinear()
+      .domain([-this.canvasSize * this.ratioWH, this.canvasSize * this.ratioWH])
+      .range([0, width]);
+    this.y = d3.scaleLinear()
+      .domain([-this.canvasSize, this.canvasSize])
+      .range([height, 0]);
+
+    this.xAxis = d3.axisBottom(this.x)
+      .ticks(width / height * 4) //
+      .tickSize(height)
+      .tickPadding(8 - height);
+  
+    this.yAxis = d3.axisRight(this.y)
+      .ticks(4)
+      .tickSize(width)
+      .tickPadding(8 - width);
+  }
+  createSvg(){
     this.winWidth = parseInt(d3.select(this.canvas).style('width'));
     this.winHeight = parseInt(d3.select(this.canvas).style('height'));
 
     // set the dimensions and margins of the graph
-    const margin = {
+    this.margin = {
       top: 0,
       right: 10,
       bottom: 10,
       left: 10
-    },
-    width = this.winWidth - margin.left - margin.right,
-    height = this.winHeight - margin.top - margin.bottom;
+    };
+    this.width = this.winWidth - this.margin.left - this.margin.right,
+    this.height = this.winHeight - this.margin.top - this.margin.bottom;
+ //   this.width = width;
+ //   this.height = height;
 
+    document.querySelector(this.canvas).innerHTML = '';  //canvas clean
     const svg = d3.select(this.canvas).append("svg")
       .attr("id", "mainCanvas")
       .attr("width", this.winWidth)
       .attr("height", this.winHeight);
 
-    const g = svg.append("g")
+    this.plot = svg.append("g")
       .attr("class", "chart")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
     
-    g.append("defs")
+    this.plot.append("defs")
       .append("clipPath")
       .attr("id", "clip")
       .append("rect")
-      .attr("width", width)
-      .attr("height", height);
-    
-    this.maxSize = d3.max(this.rltDatas.map( d => d.maxSize));
+      .attr("width", this.width)
+      .attr("height", this.height);
+  }
 
-    const canvasSize = this.maxSize * 4;
-    const ratioWH = width / height;
+  initView (){
+    const svg = d3.select("#mainCanvas");
+    const width = this.winWidth - this.margin.left - this.margin.right,
+          height = this.winHeight - this.margin.top - this.margin.bottom;
+    const xMin = d3.min(this.rltDatas.map( (d) => d3.min(d.x))),
+          xMax = d3.max(this.rltDatas.map( (d) => d3.max(d.x))),
+          yMin = d3.min(this.rltDatas.map( (d) => d3.min(d.y))),
+          yMax = d3.max(this.rltDatas.map( (d) => d3.max(d.y)));
+    var zoom = this.zoom;
+    var x = this.x, y = this.y;
+    const dx = xMax - xMin,
+          dy = yMax - yMin,
+          xx = (xMax + xMin)/2,
+          yy = (yMax + yMin)/2,
+          scale = Math.min(0.9 * 2 * this.canvasSize / dx, 0.9 * 2 * this.canvasSize / dy),
+          translate = [width / 2 - scale * x(xx), height / 2 - scale * y(yy)];
+    svg.transition()
+        .duration(0)
+        .call(zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale));
+  }
 
-    var x = d3.scaleLinear()
-      .domain([-canvasSize * ratioWH, canvasSize * ratioWH])
-      .range([0, width]);
-    var y = d3.scaleLinear()
-      .domain([-canvasSize, canvasSize])
-      .range([height, 0]);
+  getThresholds (plotValue){
+    const min = this.rltDatas.map(d => d3.min(d[plotValue]) );
+    const max = this.rltDatas.map(d => d3.max(d[plotValue]) );
+
+    this.thresholds = d3.range( d3.min(min), d3.max(max), (d3.max(max) - d3.min(min))/21) ;
+  }
+  addContours(plotValue){
+    var x = this.x;
+    var y = this.y;
+
+    for ( let ii in this.rltDatas ) {
+      let rltData = this.rltDatas[ii];
+
+      const id = '#part' + ii;
+      if (document.querySelector(id)) {
+        var contourPath = d3.select(id);
+        document.querySelector(id).innerHTML = "";
+      } else{
+        var contourPath = this.plot.append("g")
+           .attr("id", "part" + ii)
+           .attr("clip-path", "url(#clip)");
+      }
 
 
-    var xAxis = d3.axisBottom(x)
-      .ticks(width / height * 4) //
-      .tickSize(height)
-      .tickPadding(8 - height);
-  
-    var yAxis = d3.axisRight(y)
-      .ticks(4)
-      .tickSize(width)
-      .tickPadding(8 - width);
-    
-
-    for (let rltData of this.rltDatas ) {
-
-      var contourPath = g.append("g")
-         .attr("clip-path", "url(#clip)");
+//      document.querySelector(id).innerHTML = "";
 
       // Structured (n * m) grid of data. Point coordinates are (xgrid, ygrid) 
       var n = rltData.x_langth , m = rltData.y_langth;
-      var values = (rltData.p);
-      var xgrid = (rltData.x);
-      var ygrid = (rltData.y);
+      var values = rltData[plotValue];
+      var xgrid = rltData.x;
+      var ygrid = rltData.y;
 
       // configure a projection to map the contour coordinates returned by
       // d3.contours (px,py) to the input data (xgrid,ygrid)
@@ -114,10 +209,7 @@ class Chart {
       });
         
       // array of threshold values 
-     // var thresholds = [0.5605645972834632, 0.5765077054217598, 0.5924508135600565, 0.608393921698353, 0.6243370298366496, 0.6402801379749462, 0.6562232461132429, 0.6721663542515395, 0.6881094623898361, 0.7040525705281326, 0.7199956786664293, 0.7359387868047259, 0.7518818949430226, 0.7678250030813192, 0.7837681112196158, 0.7997112193579123, 0.8156543274962089, 0.8315974356345056, 0.8475405437728022, 0.8634836519110989, 0.8794267600493955, 0.895369868187692];
       var thresholds = this.thresholds;
-     //     var thresholds = d3.range(d3.min(values),d3.max(values),(d3.max(values) - d3.min(values))/22);
- //       console.log(thresholds);
 
       // color scale  
       var color = d3.scaleLinear()
@@ -139,17 +231,23 @@ class Chart {
               .attr("fill", function(d) { return color(d.value); });
 
     } //for (let rltData of rltDatas ) 
+  }
+  addZoom(){
+    const svg = d3.select("#mainCanvas");
+    const width = this.winWidth - this.margin.left - this.margin.right,
+          height = this.winHeight - this.margin.top - this.margin.bottom;
 
-    var contourAll = svg.selectAll(".contour");
-
-    var gX = g.append("g")
+    var gX = this.plot.append("g")
       .attr("class", "axis")
-      .call(xAxis);
-    var gY = g.append("g")
+      .call(this.xAxis);
+    var gY = this.plot.append("g")
       .attr("class", "axis")
-      .call(yAxis);
+      .call(this.yAxis);
+    
+    this.gX = gX;
+    this.gY = gY;
 
-    var zoom = d3.zoom()
+    this.zoom = d3.zoom()
       .scaleExtent([1, 1000])
       .translateExtent([
         [-100, -100],
@@ -157,31 +255,132 @@ class Chart {
       ])
       .on("zoom", zoomed);
 
-    svg.call(zoom);
+    svg.call(this.zoom);
+
+    var x = this.x;
+    var y = this.y;
+    var xAxis = this.xAxis;
+    var yAxis = this.yAxis;
+    var contourAll = svg.selectAll(".contour"); 
 
     function zoomed() {
       contourAll.attr("transform", d3.event.transform);
       gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
       gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
+      zoomData = d3.event.transform;
     }
   }
 }
 
 
-const filearray = [ "./result1/result_000.rlt", 
+const filearray2 = [ "./result1/result_000.rlt", 
                     "./result1/result_001.rlt", 
                     "./result1/result_002.rlt"];
 
-const filearray2 = [ "./result2/result_000.rlt", 
+const filearray = [ "./result2/result_000.rlt", 
                     "./result2/result_001.rlt", 
                     "./result2/result_002.rlt", 
                     "./result2/result_003.rlt", 
                     "./result2/result_004.rlt"];
 
 var fileContents = filearray.map( filepath => d3.text(filepath).then( text => text ) );
+var chart;
+var zoomData;
 
 Promise.all( fileContents ).then( values => {
   var rltDatas = values.map( data => new CFDData(data) );
-  var chart = new Chart ("#canvas", rltDatas);
+  chart = new Chart ("#canvas", rltDatas);
+  console.log(chart);
+  chart.createSelectOption();
 
 });
+
+
+d3.select(window).on('resize', windowResize);
+
+
+d3.select("#resetButton")
+    .on("click", () => {chart.initView();});
+
+d3.select("#zoom_in").on("click", function() {
+  const svg = d3.select("#mainCanvas");
+  chart.zoom.scaleBy(svg.transition().duration(500), 2);
+});
+d3.select("#zoom_out").on("click", function() {
+  const svg = d3.select("#mainCanvas");
+  chart.zoom.scaleBy(svg.transition().duration(500), 0.5);
+});
+
+function onchange(){
+  var selectValue = d3.select('#contourSelect').property('value');
+  chart.redraw(selectValue);
+//  console.log(d3.event.transform);
+/*
+  var x = chart.x;
+  var y = chart.y;
+  var xAxis = chart.xAxis;
+  var yAxis = chart.yAxis;
+
+  var contourAll = d3.selectAll(".contour"); 
+
+  contourAll.attr("transform", zoomData);
+  chart.gX.call(xAxis.scale(zoomData.rescaleX(x)));
+  chart.gY.call(yAxis.scale(zoomData.rescaleY(y)));
+  */
+}
+
+function windowResize() {
+  
+  var rewinWidth = parseInt(d3.select('.wb-appFrame-ViewerColumn').style('width'));
+  var rewinHeight = parseInt(d3.select('.wb-appFrame-ViewerColumn').style('height'));
+  const width = chart.width,
+        height = chart.height;
+
+  const margin = chart.margin,
+        canvasSize = chart.canvasSize, ratioWH = chart.ratioWH;
+
+  var zoom = chart.zoom;
+  const svg = d3.select("#mainCanvas"); 
+
+  var rewidth = rewinWidth - margin.left - margin.right,
+      reheight = rewinHeight - margin.top - margin.bottom;
+
+  var diffWidth = (rewidth - width) / width;
+  var diffHeight = (reheight - height) / height;
+
+  var xCanvasSize = canvasSize * ratioWH + 2*canvasSize * ratioWH *  diffWidth;
+  var yCanvasSize = canvasSize + 2*canvasSize*diffHeight;
+
+  chart.x.domain([-canvasSize * ratioWH, xCanvasSize])
+    .range([0, rewidth]);
+  chart.y.domain([-yCanvasSize, canvasSize])
+    .range([reheight, 0]);
+
+  svg.attr("width", rewinWidth);
+  svg.attr("height", rewinHeight);
+
+  chart.plot.attr("width", rewidth)
+            .attr("height", reheight);
+
+  chart.plot.select("rect")
+    .attr("width", rewidth)
+    .attr("height", reheight);
+
+  chart.xAxis.ticks(rewidth / reheight * 4) //
+    .tickSize(reheight)
+    .tickPadding(8 - reheight);
+
+  chart.yAxis.tickSize(rewidth)
+    .tickPadding(8 - rewidth);
+
+  svg.transition();
+  zoom.translateExtent([
+    [-100, -100],
+    [rewidth + 100, reheight + 100]
+  ]);
+
+  zoom.scaleBy(svg.transition(), 1);
+
+  //currentWidth = rewidth;
+  //currentHeight = reheight;
+}

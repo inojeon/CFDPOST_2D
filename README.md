@@ -9,9 +9,13 @@
    - fixed axis bug (done)
  - render multi rlt files (done)
    - Set the same thresholds (done)
- - Set initView 
+ - Set initView (done)
+ - window change (done)
+ - data change (done)
+   - fixed view point (done)
  - add color bar
- - add menu
+ - add menu (done)
+   - zoom in out, reset zoom (done)
    - change color scale 
 
 

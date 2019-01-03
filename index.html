@@ -25,25 +25,10 @@
         <div class="level-left">
           <div class="level-item">
             <p class="control">
-              <a class="button is-link tooltip is-tooltip-bottom"  data-tooltip="Mesh View" id='meshButton'>
-                <span class="icon">
-                  <i class="fas fa-th-large"></i>
-                </span>
-              </a>
-            </p>
-            <p class="control">
-              <a class="button is-primary tooltip is-tooltip-bottom"  data-tooltip="BC(Boundary Condition) View" id='bcButton'>
-                <span class="icon">
-                  <i class="fas fa-indent"></i>
-                </span>
-              </a>
-            </p>
-            <p class="control">
-              <a class="button tooltip is-tooltip-bottom"  data-tooltip="BC Title View" id='bcTitleButton'>
-                <span class="icon">
-                  <i class="fas fa-font"></i>
-                </span>
-              </a>
+              <div class="select">
+                <select id="contourSelect">
+                </select>
+              </div>
             </p>
           </div>
           <div class="level-item">
@@ -66,16 +51,6 @@
                 <span class="icon">
                   <i class="fas fa-search-minus"></i>
                 </span>
-              </a>
-            </p>
-          </div>
-          <div class="level-item">
-            <p class="control">
-              <a class="button is-info tooltip is-tooltip-bottom"  data-tooltip="Save" id='mesh_save'>
-                <span class="icon">
-                  <i class="fas fa-save"></i>
-                </span>
-                <span>Save</span>
               </a>
             </p>
           </div>
