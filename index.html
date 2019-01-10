@@ -12,7 +12,7 @@
   <link rel="stylesheet" type="text/css" href="./css/2dmesh/bulma-tooltip.min.css"/>
   <link rel="stylesheet" type="text/css" href="./css/2dmesh/bulma-pageloader.min.css"/>
   <link rel="stylesheet" type="text/css" href="./css/2dmesh/all.css"/>
-
+  
   <title>2D CFD POST</title>
 </head>
 <body>
@@ -54,48 +54,46 @@
               </a>
             </p>
           </div>
-          <div class="level-item">
-            <div class="dropdown is-right">
-
+<!--
+          <div class="dropdown is-right is-active">
               <div class="dropdown-trigger">
-              <button class="button dropdown-trigger" aria-haspopup="true" aria-controls="dropdown-menu">
-                <span class="icon">
-                  <i class="fas fa-bars"></i>
-                </span>
-              </button>
-              <div class="dropdown-menu" id="dropdown-menu" role="menu">
-                <div class="dropdown-content">
-                  <div class="dropdown-item" id="">
+                <button class="button tooltip is-tooltip-bottom"  data-tooltip="Set Contour" id='setContour' aria-haspopup="true" aria-controls="dropdown-menu2">
+                    <span class="icon">
+                      <i class="fas fa-cog"></i>
+                    </span>
+                </button>
+              </div>
+              <div class="dropdown-menu" id="dropdown-menu2" role="menu">
+                
+                <div class="dropdown-content"  style="width:350px;">
 
-                    <p><strong>Load</strong></p>
+
+                  <div class="dropdown-item">
+                    <div class="field">
+                      <div id="slider-range"></div>
+                      <p id="value-range"></p>
+                    </div>
                   </div>
-                  <a class="dropdown-item" id="sampleLoadButton">
-                    <span>Sample File</span>
-                  </a>
-                  <a class="dropdown-item" id="serverLoadButton">
-                    <span>Server File</span>
-                  </a>
-                  <a class="dropdown-item">
-                    <input class="file-input" type="file" name="resume" accept=".msh" id='localLoadButton'>
-                    <span>Local File</span>
-                  </a>
+
+
                   <hr class="dropdown-divider">
-                  <a class="dropdown-item" id='exportButton'>
-                    <span>Export</span>
-                  </a>
-                  <a class="dropdown-item" id='mesh_saveAs'>
-                    <span>Save As</span>
+                  <div class="dropdown-item">
+                    <p>You simply need to use a <code>&lt;div&gt;</code> instead.</p>
+                  </div>
+                  <hr class="dropdown-divider">
+                  <a href="#" class="dropdown-item">
+                    This is a link
                   </a>
                 </div>
               </div>
             </div>
-            </div>
-          </div>
         </div>
+      -->
       </nav>
     </div>
     <div class='wb-appFrame-ViewerColumn' id='canvas'>
     </div>
+    <div style="position: fixed; bottom: 20px; left:20px;" id='legend'> </div>
     <div class="pageloader" id="pageloader">
       <span class="title"> Loading Save As ...</span>
     </div>
@@ -104,8 +102,41 @@
   <script src="./js/2dmesh/d3.v5.min.js"></script>
   <script src="./js/2dmesh/app.js"></script>
   <script src="./js/2dmesh/main.js"></script>
-  
+  <script src="https://unpkg.com/d3-simple-slider/build/d3-simple-slider.js"></script>
   <script>  
+    // Simple
+    var data = [0, 0.005, 0.01, 0.015, 0.02, 0.025];
+
+    // Range
+    var sliderRange = d3
+      .sliderBottom()
+      .min(d3.min(data))
+      .max(d3.max(data))
+      .width(250)
+      .tickFormat(d3.format('.4'))
+      .ticks(5)
+      .default([0.015, 0.02])
+      .fill('#2196f3')
+      .on('onchange', val => {
+        d3.select('p#value-range').text(val.map(d3.format('.4')).join('-'));
+      });
+
+    var gRange = d3
+      .select('div#slider-range')
+      .append('svg')
+      .attr('width', "100%")
+      .attr('height', 100)
+      .append('g')
+      .attr('transform', 'translate(30,30)');
+
+    gRange.call(sliderRange);
+
+    d3.select('p#value-range').text(
+      sliderRange
+        .value()
+        .map(d3.format('.4'))
+        .join('-')
+    );
 
   </script>
 </body>
